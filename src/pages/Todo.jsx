@@ -32,6 +32,18 @@ const Todo = () => {
   //     });
   // },[]);
 
+  useEffect(() => {
+    axios
+      .post("/api/post/list")
+      .then((response) => {
+        console.log(response.data.success);
+        //초기 할일데이터 셋팅
+        setTodoData(response.data.initTodo);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
   const deleteData = useCallback(
     (id) => {
       const nowTodo = todoData.filter((data) => data.id !== id);

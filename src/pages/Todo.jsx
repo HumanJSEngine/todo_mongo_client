@@ -37,19 +37,31 @@ const Todo = () => {
       .post("/api/post/list")
       .then((response) => {
         console.log(response.data.success);
-        //초기 할일데이터 셋팅
         setTodoData(response.data.initTodo);
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
+
   const deleteData = useCallback(
     (id) => {
-      const nowTodo = todoData.filter((data) => data.id !== id);
-      //axios를 이용해서 MongoDB 삭제 진행
-      setTodoData(nowTodo);
-      localStorage.setItem("todoData", JSON.stringify(nowTodo));
+      if (window.confirm("삭제?")) {
+        let body = {
+          id: id,
+        };
+        axios
+          .post("/api/post/delete", body)
+          .then((response) => {
+            console.log(response);
+            const nowTodo = todoData.filter((data) => data.id !== id);
+            //axios를 이용해서 MongoDB 삭제 진행
+            setTodoData(nowTodo);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     },
     [todoData, setTodoData]
   );
@@ -61,7 +73,6 @@ const Todo = () => {
       title: todoValue,
       completed: false,
     };
-    // axios로 MongoDB에 항목 추가
     axios
       .post("/api/post/submit", { ...addTodo })
       .then((response) => {
@@ -76,13 +87,18 @@ const Todo = () => {
       .catch((error) => {
         console.log(error);
       });
-    // localStorage.setItem("todoData", JSON.stringify([...todoData, addTodo]));
   });
 
   const deleteAll = useCallback(() => {
-    //axios를 이용하여 MongoDB 초기화 목록 비워줌
-    setTodoData([]);
-    localStorage.clear();
+    if (window.confirm("모두 삭제?")) {
+      axios
+        .post("/api/post/deleteAll")
+        .then(() => {
+          setTodoData([]);
+        })
+        .catch((error) => console.log(error));
+      setTodoData([]);
+    }
   }, [setTodoData]);
 
   return (

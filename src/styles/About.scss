@@ -1,0 +1,9 @@
+$redC:#ff0000;
+
+
+.bg{
+  background-color: skyblue;
+  &:hover{
+    color:red;
+  }
+}

@@ -1,9 +1,24 @@
-/** @format */
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+// 1. firebase 사용(로그아웃 구현을 위한 처리);
+import firebase from "../firebase";
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+//2 userSlice에 저장된 user정보를 활용
+import { useSelector } from "react-redux";
 
 const Header = () => {
+  //3. userSlice에 저장해 둔 user 정보 읽기
+  // useSelector(함수 전달)
+
+  const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const logOutFn = () => {
+    console.log(user);
+    firebase.auth().signOut();
+    // 이동
+    navigate("/login");
+  };
+
   return (
     <>
       <header className="p-3 text-bg-dark">
@@ -37,20 +52,30 @@ const Header = () => {
                   login
                 </Link>
               </li>
-              <li>
-                <Link to="/signup" className="nav-link px-2 text-white">
-                  FAQs
-                </Link>
-              </li>
             </ul>
-            <div class="text-end">
-              <Link to="/login" className="btn btn-outline-light me-2">
-                Login
-              </Link>
-              <Link to="/signup" className="btn btn-warning">
-                Sign-up
-              </Link>
-            </div>
+            {/* firebase 로그인 상태 마다 표현 */}
+            {user.accessToken === "" ? (
+              <div className="text-end">
+                <Link to="/login" className="btn btn-outline-light me-2">
+                  Login
+                </Link>
+                <Link to="/signup" className="btn btn-warning">
+                  Sign-up
+                </Link>
+              </div>
+            ) : (
+              <div className="text-end">
+                <button
+                  onClick={() => logOutFn()}
+                  className="btn btn-outline-light me-2"
+                >
+                  {user.nickName} LogOut
+                </button>
+                <Link to="/userinfo" className="btn btn-warning">
+                  User Info
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>

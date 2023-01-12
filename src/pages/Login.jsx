@@ -1,9 +1,86 @@
-import React from 'react'
+import React, { useState, useRef, useEffect } from "react";
+import LoginDiv from "../styles/loginCss";
+import { useNavigate } from "react-router-dom";
+import firebase from "../firebase";
 
 const Login = () => {
-  return (
-    <div className='p-6 m-4 shadow'>Login</div>
-  )
-}
+  const [email, setEmail] = useState("bmj44571627@gmail.com");
+  const [pw, setPw] = useState("");
+  const [errMsg, setErrMsg] = useState("");
+  const navigate = useNavigate();
+  const inputRef = useRef();
 
-export default Login
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
+
+  //로그인 처리
+
+  const signInFunc = (e) => {
+    e.preventDefault();
+    if (!email || !pw) {
+      return alert("이메일이나 비번을 입력하세요");
+    }
+
+    const tempUser = firebase.auth();
+    tempUser
+      .signInWithEmailAndPassword(email, pw)
+      .then((userCredential) => {
+        // 로그인 성공
+        const user = userCredential.user;
+        console.log(user);
+        // Redux를 이용한 App의 store 관리 시작
+        // component의 state로 관리하기는 복잡하다
+        navigate("/todo");
+      })
+      .catch((error) => {
+        // 로그인 실패
+        const errorCode = error.code;
+        if (
+          errorCode === "auth/wrong-password" ||
+          errorCode === "auth/user-not-found"
+        ) {
+          setErrMsg("에러");
+        }
+      });
+  };
+
+  return (
+    <div className="p-6 m-4 shadow">
+      <h2>Login</h2>
+      <LoginDiv>
+        <form>
+          <label>이메일</label>
+          <input
+            ref={inputRef}
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <label>비밀번호</label>
+          <input
+            type="password"
+            required
+            autoComplete="off"
+            maxLength={10}
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+          />
+          {errMsg !== "" && <p style={{ color: "skyblue" }}>{errMsg}</p>}
+          <button onClick={(e) => signInFunc(e)}>로그인</button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/signup");
+            }}
+          >
+            회원가입
+          </button>
+        </form>
+      </LoginDiv>
+    </div>
+  );
+};
+
+export default Login;

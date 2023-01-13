@@ -54,8 +54,9 @@ const Todo = () => {
   const getList = (_word = "", _stIndex = 0) => {    
     setSkip(0);
     // 로딩창 보여주기
-    setSkipToggle(true);
+    
     setLoading(true);
+    setSkipToggle(false);
 
     const body = {
       sort: sort,
@@ -73,17 +74,18 @@ const Todo = () => {
           setTodoData(response.data.initTodo);
           // 시작하는 skip 번호를 갱신한다.
           setSkip(response.data.initTodo.length);
-          if (response.data.initTodo.length < 5) {
-            setSkipToggle(false);
+          if (response.data.total>5) {
+            setSkipToggle(true);
           }
         }
-        // 로딩창 숨기기
         setLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
+  
   const getListGo = (_word = "", _stIndex = 0) => {
     setLoading(true);
 

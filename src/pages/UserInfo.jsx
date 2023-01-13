@@ -6,11 +6,14 @@ import SignUpDiv from "../styles/signUpCss";
 import firebase from "../firebase";
 import axios from "axios";
 // user 정보 가져오기
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearUser } from "../reducer/userSlice";
 
 const UserInfo = () => {
   //사용자 정보 수정을 위해서 정보를 가지고 옴
   const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
   //firebase 사용자 인증 정보
   const fireUser = firebase.auth();
 
@@ -76,23 +79,55 @@ const UserInfo = () => {
     if (!nameCheck) {
       return alert("닉네임 중복검사를 해주세요.");
     }
-    //firebase에 사용자 프로필 업데이트 실행
-
+    // firebase 에 사용자 프로필 업데이트 실행
     fireUser.currentUser
       .updateProfile({
         displayName: nickName,
       })
       .then(() => {
         alert("닉네임을 변경하였습니다.");
-        setNickName(nickName);
+        let body = {
+          email: email,
+          displayName: nickName,
+          uid: user.uid,
+        };
+        axios
+          .post("/api/user/update", body)
+          .then((response) => {
+            // 서버에 사용자 이메일을 변경한다.
+            // 변경하고 나서 dipatch 보내주는 것으로 수정
+            // 실제 사용자 화면 및 userSlice state 정보 업데이트
+            if (response.data.success) {
+              alert("정보가 업데이트 되었습니다.");
+              const userInfo = {
+                displayName: nickName,
+                uid: user.uid,
+                accessToken: user.accessToken,
+                email: email,
+              };
+              dispatch(loginUser(userInfo));
+              setNickName(nickName);
+            } else {
+              alert("정보 업데이트가 실패하였습니다.");
+            }
+          })
+          .catch((error) => {
+            // alert("서버가 불안정하게 연결하였습니다.");
+            console.log(error);
+          });
       })
       .catch((error) => {
-        // 로그인 실패
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode, errorMessage);
+        alert("서버가 불안정하게 연결하였습니다.\n다시 로그인 해주세요.");
+        firebase.auth().signOut();
+        dispatch(clearUser());
+        navigate("/login");
       });
   };
+
+
   // 이메일 변경요청
   const emailUpdateFn = (e) => {
     e.preventDefault();
@@ -100,20 +135,53 @@ const UserInfo = () => {
     if (!email) {
       return alert("이메일을 입력하세요.");
     }
-    //firebase 이메일 변경 요청
+    // firebase 이메일 변경 요청
     fireUser.currentUser
       .updateEmail(email)
       .then(() => {
-        alert("이메일을 변경하였습니다.");
-        setEmail(email);
+        alert("닉네임을 변경");
+        let body = {
+          email: email,
+          displayName: nickName,
+          uid: user.uid,
+        };
+        axios
+          .post("/api/user/update", body)
+          .then((response) => {
+            // 서버에 사용자 이메일을 변경한다.
+            // 변경하고 나서 dipatch 보내주는 것으로 수정
+            // 실제 사용자 화면 및 userSlice state 정보 업데이트
+            if (response.data.success) {
+              alert("정보가 업데이트 되었습니다.");
+              const userInfo = {
+                displayName: nickName,
+                uid: user.uid,
+                accessToken: user.accessToken,
+                email: email,
+              };
+              dispatch(loginUser(userInfo));
+              setNickName(nickName);
+            } else {
+              alert("정보 업데이트가 실패하였습니다.");
+            }
+          })
+          .catch((error) => {
+            // alert("서버가 불안정하게 연결하였습니다.");
+            console.log(error);
+          });
       })
       .catch((error) => {
         // 로그인 실패
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode, errorMessage);
+        alert("서버가 불안정하게 연결하였습니다.\n다시 로그인 해주세요.");
+        firebase.auth().signOut();
+        dispatch(clearUser());
+        navigate("/login");
       });
   };
+
   // 비밀번호 변경요청
   const passUpdateFn = (e) => {
     e.preventDefault();
@@ -139,16 +207,21 @@ const UserInfo = () => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorCode, errorMessage);
+        alert("서버가 불안정하게 연결하였습니다.\n다시 로그인 해주세요.");
+        firebase.auth().signOut();
+        dispatch(clearUser());
+        navigate("/login");
       });
   };
+
   // 회원 탈퇴
   const registOutFunc = (e) => {
     e.preventDefault();
     fireUser.currentUser
-      .delete() 
+      .delete()
       .then(() => {
         // 사용자 기록 한 할일 전부 삭제
-        // 사용자 정보도 삭제 
+        // 사용자 정보도 삭제
         let body = {
           uid: user.uid,
         };
@@ -158,6 +231,7 @@ const UserInfo = () => {
             if (response.data.success) {
               alert("회원 탈퇴하였습니다.");
               // 회원정보 삭제 성공
+              dispatch(clearUser());
               navigate("/login");
             } else {
               // 회원정보 저장 실패

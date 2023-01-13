@@ -5,10 +5,10 @@ import { createSlice } from "@reduxjs/toolkit";
 const userSlice = createSlice({
   name:'user',
   initialState:{
-    nickName:'',// 사용자 닉네임
-    uid:'',// fb연동을 위한 고유아이디
-    accessToken:'', //fb 임시생성
-    email:'' // 사용자 이메일
+    nickName:'',
+    uid:'',
+    accessToken:'', 
+    email:'',
   },
   reducers:{
     loginUser:(state, action) => {
@@ -21,6 +21,7 @@ const userSlice = createSlice({
       state.nickName = '';
       state.uid = '';
       state.accessToken = '';
+      state.email = '';
     },
   },
 });

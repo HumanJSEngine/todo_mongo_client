@@ -21,7 +21,8 @@
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
     "sass": "^1.57.1",
-    "styled-components": "^5.3.6"
+    "styled-components": "^5.3.6",
+    "sweetalert2": "^11.7.0"
   },
   "scripts": {
     "start": "react-scripts start",

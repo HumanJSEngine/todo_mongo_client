@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import LoginDiv from "../styles/loginCss";
 import { useNavigate } from "react-router-dom";
 import firebase from "../firebase";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const [email, setEmail] = useState("bmj44571627@gmail.com");
@@ -19,7 +20,18 @@ const Login = () => {
   const signInFunc = (e) => {
     e.preventDefault();
     if (!email || !pw) {
-      return alert("이메일이나 비번을 입력하세요");
+      return Swal.fire({
+        title: "이메일을 입력하세요.",
+        width: 600,
+        padding: "3em",
+        color: "#716add",
+        backdrop: `
+          rgba(0,0,123,0.4)
+          url("/images/cat.gif")
+          left top
+          no-repeat
+        `,
+      });
     }
 
     const tempUser = firebase.auth();
